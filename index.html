@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPA Phonetic Symbol Keyboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-4">
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-2xl font-bold text-center mb-2 text-blue-400">IPA Phonetic Symbol Keyboard</h1>
+  <p class="text-center text-gray-400 mb-4 text-sm">Click symbols to insert into text box</p>
+
+  <div class="mb-4">
+    <label for="output" class="block text-sm font-medium text-gray-300 mb-1">Output</label>
+    <textarea id="output" rows="3" class="w-full bg-gray-800 border border-gray-600 rounded p-3 text-xl font-mono text-green-300 resize-none focus:outline-none focus:border-blue-500" placeholder="Click IPA symbols below..." aria-label="IPA text output"></textarea>
+    <div class="flex gap-2 mt-2">
+      <button onclick="copyOutput()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">Copy</button>
+      <button onclick="clearOutput()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">Clear</button>
+      <span id="copyMsg" class="text-green-400 text-sm self-center opacity-0 transition-opacity">Copied!</span>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <!-- Vowels -->
+    <div>
+      <h2 class="text-sm font-semibold text-yellow-400 mb-2 uppercase tracking-wide">Vowels</h2>
+      <div class="flex flex-wrap gap-1" id="vowels"></div>
+    </div>
+    <!-- Consonants -->
+    <div>
+      <h2 class="text-sm font-semibold text-yellow-400 mb-2 uppercase tracking-wide">Consonants (Pulmonic)</h2>
+      <div class="flex flex-wrap gap-1" id="consonants"></div>
+    </div>
+    <!-- Non-pulmonic -->
+    <div>
+      <h2 class="text-sm font-semibold text-yellow-400 mb-2 uppercase tracking-wide">Non-pulmonic Consonants</h2>
+      <div class="flex flex-wrap gap-1" id="nonpulmonic"></div>
+    </div>
+    <!-- Suprasegmentals -->
+    <div>
+      <h2 class="text-sm font-semibold text-yellow-400 mb-2 uppercase tracking-wide">Suprasegmentals & Diacritics</h2>
+      <div class="flex flex-wrap gap-1" id="supraseg"></div>
+    </div>
+  </div>
+
+  <div class="mt-4 bg-gray-800 rounded p-3">
+    <h2 class="text-sm font-semibold text-purple-400 mb-2">Quick Translate: English Word to IPA</h2>
+    <p class="text-xs text-gray-400 mb-2">Common phoneme mappings for reference</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-1 text-xs" id="translate-table"></div>
+  </div>
+</div>
+
+<script>
+const vowels = ['i','y','ɨ','ʉ','ɯ','u','ɪ','ʏ','ʊ','e','ø','ɘ','ɵ','ɤ','o','ə','ɛ','œ','ɜ','ɞ','ʌ','ɔ','æ','ɐ','a','ɶ','ä','ɑ','ɒ','ẽ','ĩ','ũ','õ','ã'];
+const consonants = ['p','b','t','d','ʈ','ɖ','c','ɟ','k','g','q','ɢ','ʔ','m','ɱ','n','ɳ','ɲ','ŋ','ɴ','ʙ','r','ʀ','ⱱ','ɾ','ɽ','ɸ','β','f','v','θ','ð','s','z','ʃ','ʒ','ʂ','ʐ','ç','ʝ','x','ɣ','χ','ʁ','ħ','ʕ','h','ɦ','ɬ','ɮ','ʋ','ɹ','ɻ','j','ɰ','l','ɭ','ʎ','ʟ','ɫ','ɥ','ʍ','w'];
+const nonpulmonic = ['ʘ','ǀ','ǃ','ǂ','ǁ','ɓ','ɗ','ʄ','ɠ','ʛ','ʼ'];
+const supraseg = ['ˈ','ˌ','ː','ˑ','̆','|','‖','.','^','↗','↘','̃','̈','̊','̽','̤','̰','̥','̬','ʰ','ʷ','ʲ','ˠ','ˤ','̹','̜','̟','̠','̈','̽'];
+
+function renderButtons(ids, symbols) {
+  const container = document.getElementById(ids);
+  symbols.forEach(sym => {
+    const btn = document.createElement('button');
+    btn.textContent = sym;
+    btn.title = sym;
+    btn.setAttribute('aria-label', 'Insert ' + sym);
+    btn.className = 'bg-gray-700 hover:bg-blue-600 text-white w-10 h-10 rounded text-lg font-mono transition-colors border border-gray-600 hover:border-blue-400';
+    btn.onclick = () => insertSymbol(sym);
+    container.appendChild(btn);
+  });
+}
+
+renderButtons('vowels', vowels);
+renderButtons('consonants', consonants);
+renderButtons('nonpulmonic', nonpulmonic);
+renderButtons('supraseg', supraseg);
+
+function insertSymbol(sym) {
+  const ta = document.getElementById('output');
+  const start = ta.selectionStart;
+  const end = ta.selectionEnd;
+  const val = ta.value;
+  ta.value = val.substring(0, start) + sym + val.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + sym.length;
+  ta.focus();
+}
+
+function copyOutput() {
+  const text = document.getElementById('output').value;
+  navigator.clipboard.writeText(text).then(() => {
+    const msg = document.getElementById('copyMsg');
+    msg.style.opacity = '1';
+    setTimeout(() => msg.style.opacity = '0', 1500);
+  });
+}
+
+function clearOutput() {
+  document.getElementById('output').value = '';
+  document.getElementById('output').focus();
+}
+
+// Translation reference table
+const phonemeMap = [
+  ['sh', 'ʃ'], ['zh', 'ʒ'], ['th (θ)', 'θ'], ['th (ð)', 'ð'],
+  ['ng', 'ŋ'], ['ch', 'tʃ'], ['j/dg', 'dʒ'], ['r', 'ɹ'],
+  ['ee', 'iː'], ['oo', 'uː'], ['ah', 'ɑː'], ['aw', 'ɔː'],
+  ['ay', 'eɪ'], ['ow', 'oʊ'], ['eye', 'aɪ'], ['oy', 'ɔɪ'],
+];
+const table = document.getElementById('translate-table');
+phonemeMap.forEach(([eng, ipa]) => {
+  const div = document.createElement('div');
+  div.className = 'flex gap-1 items-center';
+  div.innerHTML = '<span class="text-gray-400">' + eng + '</span><span class="text-gray-500">→</span><button class="text-green-300 font-mono hover:text-green-100 bg-gray-700 px-1 rounded" title="Insert ' + ipa + '">' + ipa + '</button>';
+  div.querySelector('button').onclick = () => insertSymbol(ipa);
+  table.appendChild(div);
+});
+</script>
+</body>
+</html>
